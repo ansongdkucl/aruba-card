@@ -4,6 +4,8 @@ from pathlib import Path
 import ipaddress
 import os
 from typing import Optional
+from fastapi.responses import JSONResponse
+import traceback
 
 from services.network_config import NetworkConfig
 from services.templates import TemplateManager
@@ -41,6 +43,16 @@ class SwitchRequest(BaseModel):
 # --------------------------------------------------
 # Health check
 # --------------------------------------------------
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": str(exc),
+            "traceback": traceback.format_exc()
+        }
+    )
 
 @app.get("/")
 def health():
