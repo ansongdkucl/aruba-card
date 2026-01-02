@@ -1,14 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pathlib import Path
-import json
 import ipaddress
+import os
 from typing import Optional
 
 from services.network_config import NetworkConfig
 from services.templates import TemplateManager
-
-
 
 # --------------------------------------------------
 # App setup
@@ -23,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CONFIG_DIR = BASE_DIR / "config"
 TEMPLATE_DIR = BASE_DIR / "templates"
 
+# Initialise services
 net_cfg = NetworkConfig(CONFIG_DIR / "network_config.json")
 template_mgr = TemplateManager(TEMPLATE_DIR)
 
@@ -40,12 +39,35 @@ class SwitchRequest(BaseModel):
     send_to_central: bool = False
 
 # --------------------------------------------------
-# Health check (Azure likes this)
+# Health check
 # --------------------------------------------------
 
 @app.get("/")
 def health():
     return {"status": "ok", "service": "config-generator"}
+
+# --------------------------------------------------
+# Debug endpoints (to prove what Azure deployed)
+# --------------------------------------------------
+
+@app.get("/debug/info")
+def debug_info():
+    return {
+        "cwd": os.getcwd(),
+        "base_dir": str(BASE_DIR),
+        "config_dir": str(CONFIG_DIR),
+        "template_dir": str(TEMPLATE_DIR),
+        "config_dir_exists": CONFIG_DIR.exists(),
+        "template_dir_exists": TEMPLATE_DIR.exists(),
+    }
+
+@app.get("/debug/templates")
+def debug_templates():
+    if not TEMPLATE_DIR.exists():
+        return {"template_dir": str(TEMPLATE_DIR), "exists": False, "files": []}
+
+    files = sorted([p.name for p in TEMPLATE_DIR.glob("*.j2")])
+    return {"template_dir": str(TEMPLATE_DIR), "exists": True, "files": files}
 
 # --------------------------------------------------
 # Main generator endpoint
@@ -59,15 +81,19 @@ def generate_config(req: SwitchRequest):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid management IP")
 
-    # ---- load template ----
+    # ---- load template (accepts template with or without .j2) ----
     try:
-        template_text = template_mgr.load_template(req.template)
+        tname = req.template.strip()
+        if not tname.endswith(".j2"):
+            tname = f"{tname}.j2"
+        template_text = template_mgr.load_template(tname)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     # ---- auto hostname if blank ----
-    hostname = req.hostname
+    hostname = (req.hostname or "").strip()
     if not hostname:
+        # net_cfg.generate_hostname expects a template label - either form is fine
         hostname = net_cfg.generate_hostname(req.mgmt_ip, req.template)
 
     # ---- network derived values ----
@@ -77,9 +103,7 @@ def generate_config(req: SwitchRequest):
 
     profile_type = net_cfg.detect_profile(req.template)
     profile_vlans = net_cfg.get_profile_vlans(req.mgmt_ip, profile_type)
-    trunk_allowed = net_cfg.build_trunk_list(
-        req.mgmt_ip, data_vlan_id, profile_type
-    )
+    trunk_allowed = net_cfg.build_trunk_list(req.mgmt_ip, data_vlan_id, profile_type)
 
     # ---- build profile VLAN block ----
     profile_block = ""
@@ -129,6 +153,7 @@ def generate_config(req: SwitchRequest):
     return {
         "success": True,
         "hostname": hostname,
+        "template_used": tname,
         "config": cfg,
         "central_json": central_payload,
         "send_to_central": req.send_to_central
