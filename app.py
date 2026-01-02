@@ -83,10 +83,7 @@ def generate_config(req: SwitchRequest):
 
     # ---- load template (accepts template with or without .j2) ----
     try:
-        tname = req.template.strip()
-        if not tname.endswith(".j2"):
-            tname = f"{tname}.j2"
-        template_text = template_mgr.load_template(tname)
+        template_text = template_mgr.load_template(req.template)  # now accepts .j2 or not
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
