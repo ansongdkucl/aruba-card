@@ -162,7 +162,7 @@ def generate_config(req: SwitchRequest):
     return {
         "success": True,
         "hostname": hostname,
-        "template_used": tname,
+        "template_used": req.template,  # Fix: Change 'tname' to 'req.template'
         "config": cfg,
         "central_json": central_payload,
         "send_to_central": req.send_to_central
