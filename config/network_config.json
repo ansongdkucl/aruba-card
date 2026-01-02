@@ -1,0 +1,220 @@
+{
+  "aruba-sw": {
+    "network_address": "172.22.27.0",
+    "subnet_mask": "255.255.255.0",
+    "gateway": "172.22.27.254",
+    "hosts_range": [
+      "172.22.27.1",
+      "172.22.27.253"
+    ],
+    "data_vlan": {
+      "id": "704",
+      "name": "desktop@ucl"
+    },
+    "voice_vlan": {
+      "id": "13",
+      "name": " 10.11.13.0/24_Audiocodes"
+    },
+    "profiles": {
+      "av": {
+        "520": "10.9.45.0/24_AV_Crestron_Air",
+        "530": "10.9.121.0/24_AV_Crestron_Ctrl",
+        "707": "10.9.211.0/24_AV_Crestron_NVX",
+        "712": "10.10.20.0/26_AV_Lecturecast",
+        "807": "10.8.2.0/24_AV_Q-SYS_AVoIP",
+        "850": "10.0.127.32/29_Echo",
+        "909": "10.9.12.0/24_AV"
+      },
+      "standard": {
+        "915": "10.9.45.0/24_IP_CCTV",
+        "487": "10.9.121.0/24_Cardax",
+        "990": "10.100.6.0/24_eduroam"
+      }
+    }
+  },
+
+  "aruba-tp": {
+    "network_address": "172.22.29.0",
+    "subnet_mask": "255.255.255.0",
+    "gateway": "172.22.29.254",
+    "hosts_range": [
+      "172.22.29.1",
+      "172.22.29.253"
+    ],
+    "data_vlan": {
+      "id": "10",
+      "name": "desktop@ucl"
+    },
+    "voice_vlan": {
+      "id": "2",
+      "name": "10.11.2.0/24_Audiocodes"
+    },
+    "profiles": {
+      "av": {
+        "520": "10.9.46.0/24_AV_Crestron_Air",
+        "530": "10.9.122.0/24_AV_Crestron_Ctrl",
+        "704": "128.41.5.0/24_UCLDesktop",
+        "707": "10.9.211.0/24_AV_Crestron_NVX",
+        "712": "10.10.20.0/26_AV_Lecturecast",
+        "807": "AV_QSYS_AVoIP",
+        "850": "10.0.127.32/29_Echo",
+        "909": "10.9.12.0/24_AV"
+      },
+      "standard": {
+        "915": "10.9.45.0/24_IP_CCTV",
+        "487": "10.9.121.0/24_Cardax",
+        "990": "10.100.7.0/24_990"
+      }
+    }
+  },
+
+  "aruba-phys": {
+    "network_address": "172.22.20.0",
+    "subnet_mask": "255.255.255.0",
+    "gateway": "172.22.20.254",
+    "hosts_range": [
+      "172.22.20.1",
+      "172.22.20.253"
+    ],
+    "data_vlan": {
+      "id": "130",
+      "name": "desktop@ucl"
+    },
+    "profiles": {
+      "av": {
+        "520": "10.9.42.0/24_AV_Crestron_Air",
+        "530": "10.9.114.0/24_AV_Crestron_Ctrl",
+        "712": "10.10.19.64/26_AV_Lecturecast",
+        "707": "10.9.208.0/24_AV_Crestron_NVX",
+        "807": "AV_QSYS_AVoIP",
+        "850": "10.0.127.8/29_Echo",
+        "909": "10.9.9.0/24_AV"
+      },
+      "standard": {
+        "487": "Cardax",
+        "990": "10.100.9.0/24_990",
+        "915": "10.4.28.0/25_IP_CCTV"
+      }
+    }
+  },
+
+"aruba-klb": {
+  "network_address": "172.22.16.0",
+  "subnet_mask": "255.255.255.0",
+  "gateway": "172.22.16.254",
+
+  "hosts_range": [
+    "172.22.16.1",
+    "172.22.16.253"
+  ],
+
+  "data_vlan": {
+    "id": "705",
+    "name": "128.41.5.0/24_UCLDesktop"
+  },
+
+  "voice_vlan": {
+    "id": "15",
+    "name": "10.11.15.0/24_Audiocodes"
+  },
+
+  "profiles": {
+    "av": {
+      "520": "10.9.40.0/24_AV_Crestron_AirMedia",
+      "530": "10.9.111.0/24_AV_Crestron_Ctrl",
+      "707": "10.9.205.0/24_AV_Crestron_NVX",
+      "712": "10.10.25.128/25_AV_Lecturecast",
+      "807": "10.8.2.0/24_AV_Q-SYS_AVoIP",
+      "909": "10.9.7.0/24_AV"
+    },
+
+    "standard": {
+      "487": "10.4.79.126/26_Cardax",
+      "733": "128.41.33.0/24_UCL_Desktop",
+      "915": "10.4.26.0/25_IP_CCTV",
+      "990": "10.100.2.0/24"
+    }
+  }
+},
+
+"aruba-ci": {
+  "network_address": "172.22.5.0",
+  "subnet_mask": "255.255.255.0",
+  "gateway": "172.22.5.254",
+  "hosts_range": [
+    "172.22.5.1",
+    "172.22.5.253"
+  ],
+  "data_vlan": {
+    "id": "12",
+    "name": "128.41.12.0/24_UCL_Desktop"
+  },
+  "voice_vlan": {
+    "id": "10",
+    "name": "10.11.3.0/24_Audiocodes"
+  },
+  "profiles": {
+    "av": {
+      "520": "10.9.35.0/24_AV_Crestron",
+      "530": "10.9.101.0/24_AV_Crestron_Crtl_S",
+      "707": "10.9.197.0/24_AV_Crestron_NVX",
+      "807": "AV_QSYS_AVoIP",
+      "712": "10.10.28.0/24_AV_Lecturecast",
+      "850": "10.0.127.0/29_Echo",
+      "909": "10.9.2.0/24_AV"
+    },
+    "standard": {
+      "487": "10.4.68.64/26_Cardax",
+      "915": "10.4.14.0/25_IP_CCTV",
+      "990": "10.100.5.0/24_UCL_Standard"
+    }
+  }
+},
+"aruba-mp": {
+  "network_address": "172.22.18.0",
+  "subnet_mask": "255.255.255.0",
+  "gateway": "172.22.18.254",
+
+  "hosts_range": [
+    "172.22.18.1",
+    "172.22.18.253"
+  ],
+
+  "data_vlan": {
+    "id": "37",
+    "name": "128.41.37.0/24_UCL_Desktop"
+  },
+
+  "voice_vlan": {
+    "id": "24",
+    "name": "10.11.24.0/24_Audiocodes"
+  },
+
+  "profiles": {
+    "av": {
+      "520": "10.9.41.0/24_AV_AirMedia",
+      "530": "10.9.113.0/24_AV_Crestron_Crtl_S",
+      "707": "10.9.207.0/24_AV_Crestron_NVX",
+      "712": "10.10.26.0/25_AV_Lecturecast",
+      "807": "AV_Q-SYS_AVoIP",
+      "850": "10.0.127.40/29_EchoS",
+      "909": "10.9.8.0/24_AV"
+    },
+
+    "standard": {
+      "487": "10.4.79.126/26_Cardax",
+      "915": "10.4.26.0/25_IP_CCTV",
+      "990": "10.100.2.0/24"
+    }
+  }
+}
+
+}
+
+
+
+
+
+
+
+
