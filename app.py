@@ -149,8 +149,9 @@ def generate_config(req: SwitchRequest):
     
     replacements = {
         "{{hostname}}": hostname,
-        "{{access_vlan}}": data_vlan.get("id"),
-        "{{voice_vlan}}": voice_id if voice_vlan else "",
+        "{{access_vlan}}": data_vlan.get("id", "1"),
+        # Fixed: Use voice_vlan.get("id") instead of voice_id
+        "{{voice_vlan}}": voice_vlan.get("id", "") if voice_vlan else "",
         "{{gateway}}": gateway,
         "{{location}}": req.location,
         "{{profile_vlans}}": profile_block
@@ -158,8 +159,8 @@ def generate_config(req: SwitchRequest):
 
     cfg = template_text
     for k, v in replacements.items():
-        cfg = cfg.replace(k, str(v))
-
+        cfg = cfg.replace(k, str(v or ""))
+        
     return {
         "success": True,
         "hostname": hostname,
