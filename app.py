@@ -87,83 +87,85 @@ def debug_templates():
 
 @app.post("/generate")
 def generate_config(req: SwitchRequest):
-    # ---- validate IP ----
+    # ---- 1. Validate Management IP ----
     try:
-        ipaddress.IPv4Address(req.mgmt_ip)
+        target_ip = ipaddress.ip_address(req.mgmt_ip)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid management IP")
 
-    # ---- load template (accepts template with or without .j2) ----
+    # ---- 2. Identify Site from network_config.json ----
+    # This assumes net_cfg has a helper to find the site dict by IP
+    site_key, site_info = net_cfg.find_site_by_ip(req.mgmt_ip)
+    if not site_info:
+        raise HTTPException(status_code=400, detail="IP does not match any known site in network_config.json")
+
+    # ---- 3. Load Template ----
     try:
-        template_text = template_mgr.load_template(req.template)  # now accepts .j2 or not
+        template_text = template_mgr.load_template(req.template)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # ---- auto hostname if blank ----
-    hostname = (req.hostname or "").strip()
-    if not hostname:
-        # net_cfg.generate_hostname expects a template label - either form is fine
-        hostname = net_cfg.generate_hostname(req.mgmt_ip, req.template)
+    # ---- 4. Derived Network Values ----
+    hostname = (req.hostname or "").strip() or net_cfg.generate_hostname(req.mgmt_ip, req.template)
+    
+    # Extract site-specific base values
+    data_vlan = site_info.get("data_vlan", {})
+    voice_vlan = site_info.get("voice_vlan", {})
+    gateway = site_info.get("gateway")
+    
+    # Determine profile (av vs standard)
+    profile_type = "av" if "av" in req.template.lower() else "standard"
+    profile_vlans = site_info.get("profiles", {}).get(profile_type, {})
 
-    # ---- network derived values ----
-    data_vlan_id, data_vlan_name = net_cfg.get_data_vlan(req.mgmt_ip)
-    voice_id, voice_name = net_cfg.get_voice_vlan(req.mgmt_ip)
-    gateway = net_cfg.get_gateway(req.mgmt_ip)
-
-    profile_type = net_cfg.detect_profile(req.template)
-    profile_vlans = net_cfg.get_profile_vlans(req.mgmt_ip, profile_type)
-    trunk_allowed = net_cfg.build_trunk_list(req.mgmt_ip, data_vlan_id, profile_type)
-
-    # ---- build profile VLAN block ----
-    profile_block = ""
-    for vid, vname in profile_vlans.items():
-        profile_block += f"vlan {vid}\n name {vname}\n!\n"
-
-    # ---- replace template tokens ----
-    cfg = template_text
-    replacements = {
-        "{{hostname}}": hostname,
-        "{{access_vlan}}": data_vlan_id,
-        "{{voice_vlan}}": voice_id,
-        "{{gateway}}": gateway,
-        "{{location}}": req.location,
-        "{{trunk_allowed_vlans}}": trunk_allowed,
-    }
-
-    for k, v in replacements.items():
-        cfg = cfg.replace(k, str(v))
-
-    # optional blocks
-    cfg = cfg.replace("{{profile_vlans}}", profile_block)
-
-    # ---- Aruba Central JSON ----
+    # ---- 5. Build Aruba Central Variables (_sys_) ----
     central_vars = {
         "_sys_hostname": hostname,
         "_sys_mgnt_ip": req.mgmt_ip,
         "_sys_serial": req.serial,
         "_sys_lan_mac": req.mac,
-        "_sys_location": req.location,
-        "_sys_data_vlan_id": data_vlan_id,
-        "_sys_data_vlan_name": data_vlan_name,
-        "_sys_voice_vlan_id": voice_id,
-        "_sys_voice_vlan_name": voice_name,
+        "_sys_location": req.location or "default_location",
         "_sys_gateway": gateway,
+        "_sys_data_vlan_id": data_vlan.get("id"),
+        "_sys_data_vlan_name": data_vlan.get("name"),
     }
 
+    # Add Voice VLAN if present for the site
+    if voice_vlan:
+        central_vars["_sys_voice_vlan_id"] = voice_vlan.get("id")
+        central_vars["_sys_voice_vlan_name"] = voice_vlan.get("name")
+
+    # Add Profile-Specific VLANs from your JSON
     for vid, vname in profile_vlans.items():
         central_vars[f"_sys_{vid}_vlan_name"] = vname
 
+    # ---- 6. Format Payload with Serial Number as Key ----
+    # This matches the specific requirement for Aruba Central variable imports
     central_payload = {
-        "total": len(central_vars),
-        "variables": central_vars
+        req.serial: central_vars
     }
 
-    # ---- final response ----
+    # ---- 7. Build CLI Config (Replacement Logic) ----
+    profile_block = "".join([f"vlan {vid}\n name {vname}\n!\n" for vid, vname in profile_vlans.items()])
+    
+    replacements = {
+        "{{hostname}}": hostname,
+        "{{access_vlan}}": data_vlan.get("id"),
+        "{{voice_vlan}}": voice_id if voice_vlan else "",
+        "{{gateway}}": gateway,
+        "{{location}}": req.location,
+        "{{profile_vlans}}": profile_block
+    }
+
+    cfg = template_text
+    for k, v in replacements.items():
+        cfg = cfg.replace(k, str(v))
+
     return {
         "success": True,
         "hostname": hostname,
-        "template_used": req.template,  # Fix: Change 'tname' to 'req.template'
+        "template_used": req.template,
+        "site_id": site_key,
         "config": cfg,
-        "central_json": central_payload,
+        "payload_json": central_payload,  # The JSON format you requested
         "send_to_central": req.send_to_central
     }
