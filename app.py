@@ -160,13 +160,11 @@ def generate_config(req: SwitchRequest):
     cfg = template_text
     for k, v in replacements.items():
         cfg = cfg.replace(k, str(v or ""))
-        
+
     return {
         "success": True,
         "hostname": hostname,
-        "template_used": req.template,
-        "site_id": site_key,
         "config": cfg,
-        "payload_json": central_payload,  # The JSON format you requested
-        "send_to_central": req.send_to_central
+        "payload_json": central_vars,  # Send the variables directly
+        "serial": req.serial           # Send the serial separately
     }
