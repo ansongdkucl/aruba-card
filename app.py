@@ -165,6 +165,6 @@ def generate_config(req: SwitchRequest):
         "success": True,
         "hostname": hostname,
         "config": cfg,
-        "payload_json": central_vars,  # Send the variables directly
-        "serial": req.serial           # Send the serial separately
+        "payload_json": central_payload,  # Change this from central_vars to central_payload
+        "serial": req.serial
     }
