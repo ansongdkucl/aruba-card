@@ -1,0 +1,113 @@
+user admin group administrators password plaintext *****
+
+hostname %_sys_hostname%
+!
+!
+!
+ntp server 144.82.250.8
+ntp server 144.82.251.3
+ntp server 193.60.251.3
+
+ntp enable
+!
+!
+tacacs-server host 10.28.50.99 key plaintext *****
+tacacs-server host 10.36.50.99 key plaintext *****
+!
+aaa authentication login console group tacacs local
+aaa authentication login ssh group tacacs local
+aaa authorization commands console group local
+aaa authorization commands ssh group tacacs local
+aaa accounting all-mgmt console start-stop group tacacs local
+aaa accounting all-mgmt ssh start-stop group tacacs local
+
+!
+ssh server vrf default
+access-list ip 23SNMP
+    10 permit any 10.28.12.0/255.255.255.0 any
+    20 permit any 10.36.12.0/255.255.255.0 any
+    30 permit any 10.28.50.0/255.255.255.0 any
+    40 permit any 10.36.50.0/255.255.255.0 any
+    50 permit any 10.29.50.0/255.255.255.0 any
+    60 permit any 10.37.50.0/255.255.255.0 any
+    70 permit any 128.40.19.0/255.255.255.0 any
+!
+logging 10.28.12.1 severity notice
+logging 10.28.50.60 severity notice
+logging 10.36.12.1 severity notice
+logging 10.36.50.60 severity notice
+
+spanning-tree mode rpvst auto-vlan-enable priority 8
+
+
+vlan %_sys_data_vlan_id%
+   name %_sys_data_vlan_name%
+   
+vlan 520
+   name %_sys_520_vlan_name%
+!
+vlan 530
+   name %_sys_530_vlan_name%
+!
+vlan 707
+   name %_sys_707_vlan_name%
+   ip igmp snooping enable
+!
+vlan 712
+   name %_sys_712_vlan_name%
+!
+vlan 807
+   name %_sys_807_vlan_name%
+   ip igmp snooping enable
+!
+vlan 850
+   name %_sys_850_vlan_name%
+!
+vlan 885
+   name Aruba_SW_Mgnt
+!   
+vlan 909
+   name %_sys_909_vlan_name%
+   ip igmp snooping enable
+!
+vlan 1001
+    name Blackhole
+
+interface 1/1/1-1/1/23
+    no shutdown
+    vlan access 909
+    spanning-tree bpdu-guard
+    spanning-tree root-guard
+    spanning-tree tcn-guard
+    spanning-tree port-type admin-edge
+    loop-protect
+    port-access port-security
+        enable
+        client-limit 32
+!
+interface 1/1/24-1/1/28
+    description Switch-Uplink
+    no shutdown
+    vlan trunk native 1001
+    vlan trunk allowed %_sys_data_vlan_id%,520,530,707,712,807,850,885,909
+    
+interface vlan 707
+    ip igmp enable
+interface vlan 807
+    ip igmp enable
+interface vlan 909
+    ip igmp enable
+
+interface vlan 885
+    description Switch-Management
+    ip address %_sys_mgnt_ip%/24
+
+snmp-server vrf default
+snmp-server community blooming
+
+
+snmp-server system-location %_sys_location%
+ip route 0.0.0.0/0 %_sys_gateway%
+ip dns server-address 144.82.250.1
+ip dns server-address 193.60.250.1
+no https-server vrf default

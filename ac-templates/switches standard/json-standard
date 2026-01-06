@@ -1,0 +1,11 @@
+{"SG46LHR0CQ":
+{"_sys_hostname":"ae6300-22-29-202",
+"_sys_mgnt_ip":"172.22.29.202","_sys_serial":"SG46LHR0CQ",
+"_sys_lan_mac":"9c:37:08:76:71:00","_sys_location":"croydon",
+"_sys_gateway":"172.22.29.254","_sys_data_vlan_id":"10",
+"_sys_data_vlan_name":"desktop@ucl",
+"_sys_voice_vlan_id":"2",
+"_sys_voice_vlan_name":"10.11.2.0/24_Audiocodes",
+"_sys_915_vlan_name":"10.9.45.0/24_IP_CCTV",
+"_sys_487_vlan_name":"10.9.121.0/24_Cardax",
+"_sys_990_vlan_name":"10.100.7.0/24_990"}}
