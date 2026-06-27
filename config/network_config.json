@@ -318,6 +318,50 @@
       "990": "Wi-Fi_10.100.33-34.0/24"
     }
   }
+},
+
+"aruba-cw": {
+  "network_address": "172.22.7.0",
+  "subnet_mask": "255.255.255.0",
+  "gateway": "172.22.7.254",
+
+  "hosts_range": [
+    "172.22.7.1",
+    "172.22.7.253"
+  ],
+
+  "data_vlan": {
+    "id": "415",
+    "name": "128.41.48.32/28_Desktop@UCL"
+  },
+
+  "voice_vlan": {
+    "id": "7",
+    "name": "10.11.7.0/24_Audiocodes"
+  },
+
+  "profiles": {
+    "av": {
+      "520": "10.9.49.0/24_AV_AirMedia",
+      "530": "10.9.103.0/24_AV_Crest_Crtl_Sys",
+      "707": "10.9.199.0/24_AV_Crestron_NVX",
+      "712": "10.10.24.128/25_AV_Lecturecast",
+      "807": "10.8.1.0/24_AV_Q-SYS_AVoIP",
+      "850": "10.0.127.96/28_EchoSystems",
+      "909": "10.9.16.0/24_AV_Audio_RevoLab"
+    },
+
+    "standard": {
+      "22": "128.16.22.0/23_Client",
+      "340": "128.40.193.240/29_OneLAN",
+      "487": "10.4.102.0/24_Gallagher",
+      "585": "10.4.193.192/26_StudAttdMoni",
+      "720": "EFD_BMS",
+      "770": "10.0.84.0/24_DCS_Infrastructure",
+      "885": "172.22.7.0/24_Aruba_Switch_Mgmt",
+      "915": "10.4.45.0/25_IP_CCTV"
+    }
+  }
 }
 
   
