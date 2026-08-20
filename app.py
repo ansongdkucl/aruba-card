@@ -170,6 +170,7 @@ def generate_config(req: SwitchRequest):
         if voice_vlan
         else "None"
     )
+    aruba_central_json = json.dumps(central_payload, indent=2)
     teams_message = "\n".join([
         "**Switch configuration generated**",
         f"- **Hostname:** `{hostname}`",
@@ -182,7 +183,11 @@ def generate_config(req: SwitchRequest):
         f"- **Voice VLAN:** `{voice_vlan_text}`",
         "- **Profile VLANs:**",
         profile_vlan_lines,
-        "\nThe Aruba Central payload is available in `payload_json`.",
+        "",
+        "**Aruba Central JSON**",
+        "```json",
+        aruba_central_json,
+        "```",
     ])
 
     return {
@@ -190,7 +195,7 @@ def generate_config(req: SwitchRequest):
         "hostname": hostname,
         "config": cfg,
         "payload_json": central_payload,  # Change this from central_vars to central_payload
-        "aruba_central_json": json.dumps(central_payload, indent=2),
+        "aruba_central_json": aruba_central_json,
         "teams_message": teams_message,
         "serial": req.serial
     }
