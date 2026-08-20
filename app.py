@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import ipaddress
 import os
+import json
 from typing import Optional
 from fastapi.responses import JSONResponse
 import traceback
@@ -161,10 +162,35 @@ def generate_config(req: SwitchRequest):
     for k, v in replacements.items():
         cfg = cfg.replace(k, str(v or ""))
 
+    profile_vlan_lines = "\n".join(
+        f"- VLAN {vid}: {vname}" for vid, vname in profile_vlans.items()
+    ) or "- None"
+    voice_vlan_text = (
+        f"{voice_vlan.get('id')} ({voice_vlan.get('name')})"
+        if voice_vlan
+        else "None"
+    )
+    teams_message = "\n".join([
+        "**Switch configuration generated**",
+        f"- **Hostname:** `{hostname}`",
+        f"- **Management IP:** `{req.mgmt_ip}`",
+        f"- **Site:** `{site_key}`",
+        f"- **Template:** `{req.template}`",
+        f"- **Location:** {req.location or 'default_location'}",
+        f"- **Serial:** `{req.serial}`",
+        f"- **Data VLAN:** `{data_vlan.get('id')}` ({data_vlan.get('name')})",
+        f"- **Voice VLAN:** `{voice_vlan_text}`",
+        "- **Profile VLANs:**",
+        profile_vlan_lines,
+        "\nThe Aruba Central payload is available in `payload_json`.",
+    ])
+
     return {
         "success": True,
         "hostname": hostname,
         "config": cfg,
         "payload_json": central_payload,  # Change this from central_vars to central_payload
+        "aruba_central_json": json.dumps(central_payload, indent=2),
+        "teams_message": teams_message,
         "serial": req.serial
     }
